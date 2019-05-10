@@ -9,7 +9,7 @@ cities = dict()
 
 @app.route("/")
 def hello():
-	return render_template("index.html")
+	return render_template("index.html", cities=cities)
 
 @socketio.on('connect')
 def socket_connected():

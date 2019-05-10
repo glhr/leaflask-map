@@ -21,7 +21,7 @@ const config = {
         extensions: ['.js', '.jsx', '.css'],
          alias: {
             leaflet_css: __dirname + '/node_modules/leaflet/dist/leaflet.css',
-            geosearch_css: __dirname + '/node_modules/leaflet-geosearch/assets/css/leaflet.css',
+            geosearch_css: __dirname + '/css/leaflet-geosearch_custom.css',
         }
     },
     module: {
