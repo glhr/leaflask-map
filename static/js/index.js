@@ -34,8 +34,14 @@ const searchControl = new GeoSearchControl({
   autoCompleteDelay: 250,         // optional: number      - default 250
 });
 
+const DEFAULT_CENTER = [30,0];
+const DEFAULT_ZOOM = 2;
+const BOUNDS_OFFEST = 1;
+var lat_bounds = [];
+var long_bounds = [];
+
 // initialize the map on the "map" div with a given center and zoom
-var map = L.map('map').setView([50,0], 2);
+var map = L.map('map').setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -57,8 +63,9 @@ function resultSelected(result) {
             'label': result.location.label,
             'coords': coords
            }
-    sendCity(data);
     addMarker(data);
+    updateView(data);
+    sendCity(data);
     addPlaceToList(data);
 }
 
@@ -68,6 +75,38 @@ var socket = io();
 
 function addMarker(data) {
     L.marker(data.coords).addTo(map);
+}
+
+function updateView(data) {
+    if (!lat_bounds.length) {
+        lat_bounds = [
+                        data.coords[0] - BOUNDS_OFFEST,
+                        data.coords[0] + BOUNDS_OFFEST
+                     ];
+        console.log('Latitude bounds: ', lat_bounds);
+    }
+    else {
+        lat_bounds = [
+                        Math.min(data.coords[0],lat_bounds[0]) - BOUNDS_OFFEST,
+                        Math.max(data.coords[0],lat_bounds[1]) + BOUNDS_OFFEST
+                     ];
+    }
+    if (!long_bounds.length) {
+        long_bounds = [data.coords[1] - 1, data.coords[1] + 1];
+        console.log('Longitude bounds: ', long_bounds);
+    }
+    else {
+        long_bounds = [
+                        Math.min(data.coords[1],long_bounds[0]) - BOUNDS_OFFEST,
+                        Math.max(data.coords[1],long_bounds[1]) + BOUNDS_OFFEST
+                     ];
+    }
+
+
+    map.fitBounds([
+        [lat_bounds[0], long_bounds[1]],
+        [lat_bounds[1], long_bounds[0]]
+    ]);
 }
 
 function addPlaceToList(data) {
@@ -85,4 +124,5 @@ socket.on('message', function(data) {
 socket.on('newplace', function(data) {
     console.log('New place from backend: ', data);
     addMarker(data);
+    updateView(data);
 })
