@@ -21,7 +21,7 @@
 				<div id="myplaces_container" class="col s4">
 						<ul id="myplaces_ul" class="collection">
 							{% for key, value in cities.items() %}
-							  <li class="collection-item">{{key}}</li>
+							  <li class="collection-item">{{value.shortname}}</li>
 						   	{% endfor %}
 						</ul>
 				</div>

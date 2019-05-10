@@ -9,9 +9,12 @@ require("geosearch_css");
 import L from 'leaflet';
 
 import {
-  GeoSearchControl,
-  OpenStreetMapProvider,
+    GeoSearchControl,
 } from 'leaflet-geosearch';
+
+import {
+    OpenStreetMapProvider,
+} from 'leaflet-geosearch_custom';
 
 const provider = new OpenStreetMapProvider();
 
@@ -61,7 +64,9 @@ function resultSelected(result) {
 
     var data = {
             'label': result.location.label,
-            'coords': coords
+            'coords': coords,
+            'city': result.location.raw.address.city,
+            'country': result.location.raw.address.country,
            }
     console.log("Result selected: ", data)
     addMarker(data);
@@ -112,7 +117,7 @@ function updateView(data) {
 }
 
 function addPlaceToList(data) {
-    $('#myplaces_ul').append('<li class="collection-item">' + data.label + '</li>');
+    $('#myplaces_ul').append('<li class="collection-item">' + data.city + ', ' + data.country + '</li>');
 }
 
 function sendCity(city) {
