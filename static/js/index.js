@@ -56,13 +56,14 @@ map.on('geosearch/showlocation', resultSelected);
 
 function resultSelected(result) {
     console.log(result);
-    let coords = [parseFloat(result.location.raw.lat), parseFloat(result.location.raw.lon)]
-    console.log(coords)
+    let coords = L.point([parseFloat(result.location.raw.lat), parseFloat(result.location.raw.lon)])
+
 
     var data = {
             'label': result.location.label,
             'coords': coords
            }
+    console.log("Result selected: ", data)
     addMarker(data);
     updateView(data);
     sendCity(data);
@@ -74,31 +75,32 @@ import io from 'socket.io-client';
 var socket = io();
 
 function addMarker(data) {
-    L.marker(data.coords).addTo(map);
+    let latlon = L.latLng(data.coords.x,data.coords.y);
+    L.marker(latlon).addTo(map);
 }
 
 function updateView(data) {
     if (!lat_bounds.length) {
         lat_bounds = [
-                        data.coords[0] - BOUNDS_OFFEST,
-                        data.coords[0] + BOUNDS_OFFEST
+                        data.coords.x - BOUNDS_OFFEST,
+                        data.coords.x + BOUNDS_OFFEST
                      ];
         console.log('Latitude bounds: ', lat_bounds);
     }
     else {
         lat_bounds = [
-                        Math.min(data.coords[0],lat_bounds[0]) - BOUNDS_OFFEST,
-                        Math.max(data.coords[0],lat_bounds[1]) + BOUNDS_OFFEST
+                        Math.min(data.coords.x,lat_bounds[0]) - BOUNDS_OFFEST,
+                        Math.max(data.coords.x,lat_bounds[1]) + BOUNDS_OFFEST
                      ];
     }
     if (!long_bounds.length) {
-        long_bounds = [data.coords[1] - 1, data.coords[1] + 1];
+        long_bounds = [data.coords.y - 1, data.coords.y + 1];
         console.log('Longitude bounds: ', long_bounds);
     }
     else {
         long_bounds = [
-                        Math.min(data.coords[1],long_bounds[0]) - BOUNDS_OFFEST,
-                        Math.max(data.coords[1],long_bounds[1]) + BOUNDS_OFFEST
+                        Math.min(data.coords.y,long_bounds[0]) - BOUNDS_OFFEST,
+                        Math.max(data.coords.y,long_bounds[1]) + BOUNDS_OFFEST
                      ];
     }
 
@@ -122,6 +124,7 @@ socket.on('message', function(data) {
 })
 
 socket.on('newplace', function(data) {
+    data.coords = L.point(data.coords);
     console.log('New place from backend: ', data);
     addMarker(data);
     updateView(data);
