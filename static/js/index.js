@@ -64,7 +64,7 @@ function resultSelected(result) {
     let city_like = [   result.location.raw.address.city,
                         result.location.raw.address.town,
                         result.location.raw.address.village,
-                        result.location.raw.address.city_district
+                        result.location.raw.address.city_district,
                         result.location.raw.address.hamlet,
                         result.location.raw.address.county,
                         result.location.raw.address.region,
