@@ -22,6 +22,7 @@ const config = {
          alias: {
             leaflet_css: __dirname + '/node_modules/leaflet/dist/leaflet.css',
             geosearch_css: __dirname + '/css/leaflet-geosearch_custom.css',
+            countries_geojson: __dirname + '/js/countries.json',
         }
     },
     module: {

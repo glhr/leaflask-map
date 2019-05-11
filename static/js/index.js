@@ -5,6 +5,7 @@ var $ = require("jquery");
 
 require("leaflet_css");
 require("geosearch_css");
+var countries_geojson = require("countries_geojson");
 
 import L from 'leaflet';
 
@@ -53,6 +54,42 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
         accessToken: 'pk.eyJ1IjoiZ2xociIsImEiOiJjanY5bWJzOWcxMzJsNDNzMWppb2pjODljIn0.wSf7rLO1Fl-GNK35Nb1CbA'
 }).addTo(map);
 
+var filledStyle = {
+    fillColor: "red",
+    weight: 1,
+    opacity: 1,
+    color: 'white',
+//    dashArray: '3',
+    fillOpacity: 0.5
+};
+
+var noStyle = {
+    fillColor: "red",
+    weight: 1,
+    opacity: 0,
+    color: 'white',
+//    dashArray: '3',
+    fillOpacity: 0
+};
+
+
+var countries_layers = [];
+
+L.geoJSON(countries_geojson, {
+    onEachFeature: myOnEachFeature,
+    style: noStyle
+}).addTo(map);
+
+function myOnEachFeature(feature, featureLayer) {
+    countries_layers[feature.properties.ADMIN] = featureLayer;
+}
+
+function fillCountry(data) {
+    let country = data.country;
+    countries_layers[country].setStyle(filledStyle);
+}
+
+
 map.addControl(searchControl);
 
 map.on('geosearch/showlocation', resultSelected);
@@ -87,6 +124,7 @@ function addMarker(data) {
     let latlon = L.latLng(data.coords.x,data.coords.y);
     L.marker(latlon).addTo(map);
     updateView(data);
+    fillCountry(data);
 }
 
 function updateView(data) {
