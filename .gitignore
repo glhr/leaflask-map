@@ -3,3 +3,6 @@ static/webpack*
 !static/webpack.config*
 .DS_Store
 .idea
+static/demo
+static/node_modules/*
+!static/node_modules/leaflet-geosearch_custom
