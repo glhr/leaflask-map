@@ -6,3 +6,4 @@ static/webpack*
 static/demo
 static/node_modules/*
 !static/node_modules/leaflet-geosearch_custom
+static/dist/bundle.js
