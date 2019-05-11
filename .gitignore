@@ -1,4 +1,5 @@
 static/*.cmd
 static/webpack*
+!static/webpack.config*
 .DS_Store
 .idea
