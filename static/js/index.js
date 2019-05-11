@@ -70,18 +70,14 @@ function resultSelected(result) {
            }
     console.log("Result selected: ", data)
     addMarker(data);
-    updateView(data);
     sendCity(data);
     addPlaceToList(data);
 }
 
-import io from 'socket.io-client';
-
-var socket = io();
-
 function addMarker(data) {
     let latlon = L.latLng(data.coords.x,data.coords.y);
     L.marker(latlon).addTo(map);
+    updateView(data);
 }
 
 function updateView(data) {
@@ -120,6 +116,18 @@ function addPlaceToList(data) {
     $('#myplaces_ul').append('<li class="collection-item">' + data.city + ', ' + data.country + '</li>');
 }
 
+import io from 'socket.io-client';
+
+const roomName = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
+console.log('user:',username);
+var socket = io({
+    query: {
+        roomName: username,
+    },
+    transports: ['websocket'],
+    upgrade: false
+});
+
 function sendCity(city) {
     socket.emit('newplace',city);
 }
@@ -129,8 +137,8 @@ socket.on('message', function(data) {
 })
 
 socket.on('newplace', function(data) {
-    data.coords = L.point(data.coords);
     console.log('New place from backend: ', data);
+    data.coords = L.point(data.coords);
     addMarker(data);
-    updateView(data);
+
 })
