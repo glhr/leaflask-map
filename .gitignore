@@ -1,0 +1,4 @@
+static/*.cmd
+static/webpack*
+.DS_Store
+.idea
