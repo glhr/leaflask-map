@@ -59,13 +59,22 @@ map.on('geosearch/showlocation', resultSelected);
 
 function resultSelected(result) {
     console.log(result);
-    let coords = L.point([parseFloat(result.location.raw.lat), parseFloat(result.location.raw.lon)])
+    let coords = L.point([parseFloat(result.location.raw.lat), parseFloat(result.location.raw.lon)]);
 
+    let city_like = [   result.location.raw.address.city,
+                        result.location.raw.address.town,
+                        result.location.raw.address.village,
+                        result.location.raw.address.city_district
+                        result.location.raw.address.hamlet,
+                        result.location.raw.address.county,
+                        result.location.raw.address.region,
+                        ''  ];
+    let city = city_like.filter(Boolean)[0];
 
     var data = {
             'label': result.location.label,
             'coords': coords,
-            'city': result.location.raw.address.city,
+            'city': city,
             'country': result.location.raw.address.country,
            }
     console.log("Result selected: ", data)
