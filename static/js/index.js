@@ -121,6 +121,7 @@ function resultSelected(result) {
             'coords': coords,
             'city': city,
             'country': result.location.raw.address.country,
+            'img': country_icons[result.location.raw.address.country] || ''
            }
     console.log("Result selected: ", data)
     addMarker(data);
@@ -171,13 +172,21 @@ function updateView(data) {
     }
 }
 
+var country_icons = {
+    'france': 'https://cdn.pixabay.com/photo/2016/01/22/16/42/eiffel-tower-1156146_640.jpg',
+    'united-kingdom': 'https://images.pexels.com/photos/672532/pexels-photo-672532.jpeg?cs=srgb&dl=aerial-view-ancient-architecture-672532.jpg&fm=jpg?dl&fit=crop&crop=entropy&w=640&h=427',
+    'romania': 'https://cdn.pixabay.com/photo/2014/10/09/23/19/peles-482667_640.jpg',
+    'netherlands': 'https://images.pexels.com/photos/462264/pexels-photo-462264.jpeg?cs=srgb&dl=apartment-architecture-buildings-462264.jpg&fm=jpg?dl&fit=crop&crop=entropy&w=640&h=426',
+    'egypt': 'https://cdn.pixabay.com/photo/2017/03/20/14/33/pyramids-2159286_640.jpg'
+}
+
 function addPlaceToList(data) {
     let country_lowercase = data.country.replace(/\W+/g, '-').toLowerCase();
     let city_lowercase = data.city.replace(/\W+/g, '-').toLowerCase();
 
     // country isn't listed yet
     if(!$("#"+country_lowercase).length) {
-        let img = '<img src="https://www.studyabroad.com/sites/default/files/images/england-fall-semester-abroad.jpg" alt="" class="circle">';
+        let img = '<img src="'+ country_icons[country_lowercase] +'" alt="" class="circle">';
         let title = '<span class="title myplaces_country"><b>' + data.country + '</b></span>';
         $('#myplaces_ul').append('<li class="collection-item avatar" id="'+ country_lowercase + '">' + img + title + '</li>');
     }
