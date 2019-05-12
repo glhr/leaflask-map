@@ -91,7 +91,9 @@ if (ENABLE_LAYERS) {
 function fillCountry(data) {
     if (ENABLE_LAYERS) {
         let country = data.country;
-        countries_layers[country].setStyle(filledStyle);
+        if(country in countries_layers) {
+            countries_layers[country].setStyle(filledStyle);
+        }
     }
 }
 
@@ -165,8 +167,9 @@ function updateView(data) {
 }
 
 function addPlaceToList(data) {
-    let country_lowercase = data.country.toString().toLowerCase();
-    let city_lowercase = data.city.toString().toLowerCase();
+    let country_lowercase = data.country.replace(/\W+/g, '-').toLowerCase();
+    let city_lowercase = data.city.replace(/\W+/g, '-').toLowerCase();
+    console.log(country_lowercase, city_lowercase);
 
     // country isn't listed yet
     if(!$("#"+country_lowercase).length) {
