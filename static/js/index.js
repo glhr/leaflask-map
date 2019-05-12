@@ -1,3 +1,5 @@
+const ENABLE_LAYERS = true;
+
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
 
@@ -54,7 +56,10 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
         accessToken: 'pk.eyJ1IjoiZ2xociIsImEiOiJjanY5bWJzOWcxMzJsNDNzMWppb2pjODljIn0.wSf7rLO1Fl-GNK35Nb1CbA'
 }).addTo(map);
 
-var filledStyle = {
+
+
+if (ENABLE_LAYERS) {
+    var filledStyle = {
     fillColor: "red",
     weight: 1,
     opacity: 1,
@@ -63,7 +68,7 @@ var filledStyle = {
     fillOpacity: 0.5
 };
 
-var noStyle = {
+    var noStyle = {
     fillColor: "red",
     weight: 1,
     opacity: 0,
@@ -72,23 +77,23 @@ var noStyle = {
     fillOpacity: 0
 };
 
+    var countries_layers = [];
+    L.geoJSON(countries_geojson, {
+        onEachFeature: myOnEachFeature,
+        style: noStyle
+    }).addTo(map);
 
-var countries_layers = [];
-
-L.geoJSON(countries_geojson, {
-    onEachFeature: myOnEachFeature,
-    style: noStyle
-}).addTo(map);
-
-function myOnEachFeature(feature, featureLayer) {
-    countries_layers[feature.properties.ADMIN] = featureLayer;
+    function myOnEachFeature(feature, featureLayer) {
+        countries_layers[feature.properties.ADMIN] = featureLayer;
+    }
 }
 
 function fillCountry(data) {
-    let country = data.country;
-    countries_layers[country].setStyle(filledStyle);
+    if (ENABLE_LAYERS) {
+        let country = data.country;
+        countries_layers[country].setStyle(filledStyle);
+    }
 }
-
 
 map.addControl(searchControl);
 
@@ -160,7 +165,17 @@ function updateView(data) {
 }
 
 function addPlaceToList(data) {
-    $('#myplaces_ul').append('<li class="collection-item">' + data.city + ', ' + data.country + '</li>');
+    let country_lowercase = data.country.toString().toLowerCase();
+    let city_lowercase = data.city.toString().toLowerCase();
+
+    // country isn't listed yet
+    if(!$("#"+country_lowercase).length) {
+        let img = '<img src="https://www.studyabroad.com/sites/default/files/images/england-fall-semester-abroad.jpg" alt="" class="circle">';
+        let title = '<span class="title myplaces_country"><b>' + data.country + '</b></span>';
+        $('#myplaces_ul').append('<li class="collection-item avatar" id="'+ country_lowercase + '">' + img + title + '</li>');
+    }
+    // add city
+    $("#"+country_lowercase).append('<p id="'+city_lowercase+'">' + data.city + '</p>');
 }
 
 import io from 'socket.io-client';
