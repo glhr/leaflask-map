@@ -4,16 +4,19 @@ eventlet.monkey_patch()
 from flask import Flask, request, render_template
 import json
 from flask_socketio import SocketIO, emit, send, join_room
+import re
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 cities = dict()
 
-user_data = {'glhr': {'London, Greater London, England, SW1A 2DX, United Kingdom',
-				   'Paris, Ile-de-France, Metropolitan France, France'
-					  }
-			 }
+# user_data = {'glhr': {'London, Greater London, England, SW1A 2DX, United Kingdom',
+# 				   'Paris, Ile-de-France, Metropolitan France, France'
+# 					  }
+# 			 }
+
+user_data = dict()
 
 rooms = set()
 
@@ -31,9 +34,16 @@ class Place():
 	def asdict(self):
 		return self.__dict__
 
+def normalize(place):
+	return re.sub(r"\W+",'-',place.lower())
+
 @app.route("/")
 def mainview():
 	return render_template("index.html", username='', cities=cities)
+
+@app.route("/debug")
+def show_debug_info():
+	return f"clients: {str(clients)}<br/><br/>cities: {str(cities)}<br/><br/>cities: {str(cities.values())}<br/><br/>user_data: {str(user_data)}"
 
 @app.route("/user/<username>")
 def userview(username):
@@ -41,7 +51,7 @@ def userview(username):
 		user_data[username] = {}
 	print(user_data[username])
 
-	return render_template("index.html", username=username, cities={k:v for k,v in cities.items() if k in user_data[username]})
+	return render_template("index.html", normalize=normalize, username=username, cities={k:v for k,v in cities.items() if k in user_data[username]})
 
 @socketio.on('connect')
 def socket_connected():
@@ -54,13 +64,13 @@ def socket_connected():
 	print(clients)
 	print(f"{request.sid} ({clients[request.sid]}) connected")
 
-	# send(json.dumps({h: request.headers[h] for h in request.headers.keys() if h not in ['Host', 'Content-Type', 'Content-Length']}))
+	send(json.dumps({h: request.headers[h] for h in request.headers.keys() if h not in ['Host', 'Content-Type', 'Content-Length']}))
 	if user:
-		if user_data.get(user): data = [v.asdict() for k, v in cities.items() if k in user_data[user]]
+		if user_data.get(user): data = [v.asdict() for k,d in cities.items() for v in d.values() if k in user_data[user]]
 		else: data = []
 		print("User",user,"specified. Data:", data)
 	else:
-		data = [v.asdict() for k,v in cities.items()]
+		data = [v.asdict() for d in cities.values() for v in d.values()]
 		print("No user specified. Data:", data)
 
 	for entry in data:
@@ -75,21 +85,23 @@ def socket_connected():
 
 @socketio.on('newplace')
 def new_place(data):
-	city = Place(data)
+	city_object = Place(data)
 	# print('Creating new Place object:', city)
-	cities[data['label']] = city
+	if data['country'] not in cities:
+		cities[data['country']] = dict()
+	cities[data['country']].update({data['label']:city_object})
 	print('Updated cities:', cities.keys())
-	try:
-		username = clients[request.sid]
-		print('Received new place from', username, data)
-		try:
-			user_data[username].add(data['label'])
-		except AttributeError:
-			user_data[username] = {data['label']}
-		finally:
-			print(username,'data:', user_data[username])
-	except KeyError:
-		pass
+	# try:
+	username = clients[request.sid]
+	print('Received new place from', username, data)
+	if username not in user_data:
+		user_data[username] = dict()
+	user_data[username].setdefault(data['country'],set()).add(data['label'])
+	print(username,'data:', user_data[username])
+	# except KeyError:
+	# 	pass
+
+
 
 if __name__ == '__main__':
 	socketio.run(app, host='0.0.0.0', port=3000, use_reloader=True, debug=True)

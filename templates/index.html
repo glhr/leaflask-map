@@ -23,7 +23,13 @@
 				<div id="myplaces_container" class="col s4">
 						<ul id="myplaces_ul" class="collection">
 							{% for key, value in cities.items() %}
-							  <li class="collection-item">{{value.shortname}}</li>
+								<li class="collection-item avatar" id="{{key.lower()}}">
+									<img src="" alt="" class="circle">
+									<span class="title myplaces_country"><b>{{key}}</b></span>
+									{% for city, data in value.items() %}
+									<p id="{{data.city.lower()}}">{{data.city}}</p>
+									{% endfor %}
+								</li>
 						   	{% endfor %}
 						</ul>
 				</div>
