@@ -1,4 +1,5 @@
 const ENABLE_LAYERS = true;
+const ENABLE_MARKERS = false;
 
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
@@ -7,7 +8,7 @@ var $ = require("jquery");
 
 require("leaflet_css");
 require("geosearch_css");
-var countries_geojson = require("countries_geojson");
+if (ENABLE_LAYERS) var countries_geojson = require("countries_geojson");
 
 import L from 'leaflet';
 
@@ -126,10 +127,13 @@ function resultSelected(result) {
     sendCity(data);
     addPlaceToList(data);
 }
+var markers = {};
 
 function addMarker(data) {
     let latlon = L.latLng(data.coords.x,data.coords.y);
-    L.marker(latlon).addTo(map);
+    let marker = L.marker(latlon);
+    markers[data.label] = marker;
+    if(ENABLE_MARKERS) marker.addTo(map);
     updateView(data);
     fillCountry(data);
 }
@@ -140,7 +144,7 @@ function updateView(data) {
                         data.coords.x - BOUNDS_OFFEST,
                         data.coords.x + BOUNDS_OFFEST
                      ];
-        console.log('Latitude bounds: ', lat_bounds);
+//        console.log('Latitude bounds: ', lat_bounds);
     }
     else {
         lat_bounds = [
@@ -150,7 +154,7 @@ function updateView(data) {
     }
     if (!long_bounds.length) {
         long_bounds = [data.coords.y - 1, data.coords.y + 1];
-        console.log('Longitude bounds: ', long_bounds);
+//        console.log('Longitude bounds: ', long_bounds);
     }
     else {
         long_bounds = [
@@ -159,17 +163,17 @@ function updateView(data) {
                      ];
     }
 
-
-    map.fitBounds([
-        [lat_bounds[0], long_bounds[1]],
-        [lat_bounds[1], long_bounds[0]]
-    ]);
+    if (Object.keys(markers).length > 1) {
+        map.fitBounds([
+            [lat_bounds[0], long_bounds[1]],
+            [lat_bounds[1], long_bounds[0]]
+        ]);
+    }
 }
 
 function addPlaceToList(data) {
     let country_lowercase = data.country.replace(/\W+/g, '-').toLowerCase();
     let city_lowercase = data.city.replace(/\W+/g, '-').toLowerCase();
-    console.log(country_lowercase, city_lowercase);
 
     // country isn't listed yet
     if(!$("#"+country_lowercase).length) {
