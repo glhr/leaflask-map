@@ -24,7 +24,7 @@
 						<ul id="myplaces_ul" class="collection">
 							{% for key, value in cities.items() %}
 								<li class="collection-item avatar" id="{{key.lower()}}">
-									<img src="" alt="" class="circle">
+									<img src="/static/images/country_icons/{{key}}.jpg" alt="{{key}}" class="circle">
 									<span class="title myplaces_country"><b>{{key}}</b></span>
 									{% for city, data in value.items() %}
 									<p id="{{data.city.lower()}}">{{data.city}}</p>

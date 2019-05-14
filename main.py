@@ -1,10 +1,12 @@
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for
 import json
 from flask_socketio import SocketIO, emit, send, join_room
 import re
+import requests, shutil
+from PIL import Image
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -29,6 +31,7 @@ class Place():
 		self.country = data.get('country')
 		self.city = data.get('city')
 		self.shortname = f"{self.city}, {self.country}"
+		self.img = data.get('img')
 	def __str__(self):
 		return str(self.__class__) + ": " + str(self.__dict__)
 	def asdict(self):
@@ -101,7 +104,22 @@ def new_place(data):
 	# except KeyError:
 	# 	pass
 
+@socketio.on('newcountryimg')
+def new_place(data):
 
+	url = data.get('img')
+
+	if url:
+		extension = '.' + url.split('.')[-1].split('?')[0].split('&')[0]
+		print('New image for', data['country'], url)
+		response = requests.get(url, stream=True)
+		out_path = "static/images/country_icons/" + data['country']
+		with open(out_path + extension, 'wb') as out_file:
+			shutil.copyfileobj(response.raw, out_file)
+		im = Image.open(out_path + extension)
+		im.thumbnail((200,200))
+		im.save(out_path+'.jpg',"JPEG")
+		del response
 
 if __name__ == '__main__':
 	socketio.run(app, host='0.0.0.0', port=3000, use_reloader=True, debug=True)

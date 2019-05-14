@@ -120,8 +120,8 @@ function resultSelected(result) {
             'label': result.location.label,
             'coords': coords,
             'city': city,
-            'country': result.location.raw.address.country,
-            'img': country_icons[result.location.raw.address.country] || ''
+            'country': result.location.raw.address.country
+            //'img':country_icons[normalizePlaceName(result.location.raw.address.country)]
            }
     console.log("Result selected: ", data)
     addMarker(data);
@@ -180,15 +180,20 @@ var country_icons = {
     'egypt': 'https://cdn.pixabay.com/photo/2017/03/20/14/33/pyramids-2159286_640.jpg'
 }
 
+function normalizePlaceName(name) {
+    return name.replace(/\W+/g, '-').toLowerCase();
+}
 function addPlaceToList(data) {
-    let country_lowercase = data.country.replace(/\W+/g, '-').toLowerCase();
-    let city_lowercase = data.city.replace(/\W+/g, '-').toLowerCase();
+    let country_lowercase = normalizePlaceName(data.country);
+    let city_lowercase = normalizePlaceName(data.city);
 
     // country isn't listed yet
     if(!$("#"+country_lowercase).length) {
         let img = '<img src="'+ country_icons[country_lowercase] +'" alt="" class="circle">';
         let title = '<span class="title myplaces_country"><b>' + data.country + '</b></span>';
         $('#myplaces_ul').append('<li class="collection-item avatar" id="'+ country_lowercase + '">' + img + title + '</li>');
+
+        socket.emit('newcountryimg',{'country':data.country,'img':country_icons[country_lowercase]});
     }
     // add city
     $("#"+country_lowercase).append('<p id="'+city_lowercase+'">' + data.city + '</p>');
