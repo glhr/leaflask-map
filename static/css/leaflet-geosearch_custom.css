@@ -106,7 +106,7 @@
 
 .leaflet-control-geosearch .results.active {
   padding: 8px 0;
-  border-top: 1px solid #c6c6c6;
+  /*border-top: 1px solid #c6c6c6;*/
 }
 
 .leaflet-control-geosearch .results > :hover {
@@ -159,6 +159,8 @@
 .leaflet-control-geosearch.bar form input {
   min-width: 100%;
   width: 100%;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+
 }
 
 .leaflet-control-geosearch.bar .results.active:after {
@@ -204,10 +206,16 @@
   text-overflow: ellipsis;
 
   cursor: pointer;
+
+  font-size: 1.2em;
 }
 
 .leaflet-control-geosearch .results > div:hover {
   cursor: pointer;
   background-color: #f8f8f8;
   border-color: #c6c6c6;
+}
+
+.leaflet-container {
+	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
