@@ -1,6 +1,3 @@
-const ENABLE_LAYERS = true;
-const ENABLE_MARKERS = false;
-
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
 
@@ -8,7 +5,7 @@ var $ = require("jquery");
 
 require("leaflet_css");
 require("geosearch_css");
-if (ENABLE_LAYERS) var countries_geojson = require("countries_geojson");
+const countries_geojson = require("countries_geojson");
 
 import L from 'leaflet';
 
@@ -47,8 +44,16 @@ const BOUNDS_OFFEST = 1;
 var lat_bounds = [];
 var long_bounds = [];
 
+var markerLayer = new L.featureGroup();
+
+var overlayMarkers = {
+    "Markers": markerLayer
+};
+
 // initialize the map on the "map" div with a given center and zoom
-var map = L.map('map').setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+var map = L.map('map', {
+    layers: [markerLayer]
+}).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -57,10 +62,11 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
         accessToken: 'pk.eyJ1IjoiZ2xociIsImEiOiJjanY5bWJzOWcxMzJsNDNzMWppb2pjODljIn0.wSf7rLO1Fl-GNK35Nb1CbA'
 }).addTo(map);
 
+var layerControl = L.control.layers();
+layerControl.addOverlay(markerLayer,"markers");
+layerControl.addTo(map);
 
-
-if (ENABLE_LAYERS) {
-    var filledStyle = {
+var filledStyle = {
     fillColor: "red",
     weight: 1,
     opacity: 1,
@@ -69,32 +75,26 @@ if (ENABLE_LAYERS) {
     fillOpacity: 0.5
 };
 
-    var noStyle = {
-    fillColor: "red",
-    weight: 1,
+var noStyle = {
     opacity: 0,
-    color: 'white',
-//    dashArray: '3',
     fillOpacity: 0
 };
 
-    var countries_layers = [];
-    L.geoJSON(countries_geojson, {
-        onEachFeature: myOnEachFeature,
-        style: noStyle
-    }).addTo(map);
+var countries_layers = [];
+L.geoJSON(countries_geojson, {
+    onEachFeature: myOnEachFeature,
+    style: noStyle
+}).addTo(map);
 
-    function myOnEachFeature(feature, featureLayer) {
-        countries_layers[feature.properties.ADMIN] = featureLayer;
-    }
+function myOnEachFeature(feature, featureLayer) {
+    countries_layers[feature.properties.ADMIN] = featureLayer;
 }
 
+
 function fillCountry(data) {
-    if (ENABLE_LAYERS) {
-        let country = data.country;
-        if(country in countries_layers) {
-            countries_layers[country].setStyle(filledStyle);
-        }
+    let country = data.country;
+    if(country in countries_layers) {
+        countries_layers[country].setStyle(filledStyle);
     }
 }
 
@@ -120,13 +120,14 @@ function resultSelected(result) {
             'label': result.location.label,
             'coords': coords,
             'city': city,
-            'country': result.location.raw.address.country
-            //'img':country_icons[normalizePlaceName(result.location.raw.address.country)]
+            'country': result.location.raw.address.country,
+            'country_id': normalizePlaceName(result.location.raw.address.country),
+            'city_id': normalizePlaceName(result.location.raw.address.city)
            }
-    console.log("Result selected: ", data)
+    console.log("Result selected: ", data);
+    addPlaceToList(data);
     addMarker(data);
     sendCity(data);
-    addPlaceToList(data);
 }
 var markers = {};
 
@@ -134,7 +135,13 @@ function addMarker(data) {
     let latlon = L.latLng(data.coords.x,data.coords.y);
     let marker = L.marker(latlon);
     markers[data.label] = marker;
-    if(ENABLE_MARKERS) marker.addTo(map);
+    marker.on('mouseover',function(ev) {
+      $('#'+data.country_id + '> #'+data.city_id).css({'font-weight':'bold'});
+    });
+    marker.on('mouseout',function(ev) {
+      $('#'+data.country_id + '> #'+data.city_id).css({'font-weight':'normal'});
+    });
+    markerLayer.addLayer(marker);
     updateView(data);
     fillCountry(data);
 }
@@ -189,14 +196,14 @@ function addPlaceToList(data) {
 
     // country isn't listed yet
     if(!$("#"+country_lowercase).length) {
-        let img = '<img src="'+ country_icons[country_lowercase] +'" alt="" class="circle">';
+        let img = '<img src="'+ country_icons[data.country_id] +'" alt="" class="circle">';
         let title = '<span class="title myplaces_country"><b>' + data.country + '</b></span>';
-        $('#myplaces_ul').append('<li class="collection-item avatar" id="'+ country_lowercase + '">' + img + title + '</li>');
+        $('#myplaces_ul').append('<li class="collection-item avatar" id="'+ data.country_id + '">' + img + title + '</li>');
 
-        socket.emit('newcountryimg',{'country':data.country,'img':country_icons[country_lowercase]});
+        socket.emit('newcountryimg',{'country':data.country,'img':country_icons[data.country_id]});
     }
     // add city
-    $("#"+country_lowercase).append('<p id="'+city_lowercase+'">' + data.city + '</p>');
+    $("#"+country_lowercase).append('<p id="'+data.city_id+'">' + data.city + '</p>');
 }
 
 import io from 'socket.io-client';
@@ -223,5 +230,10 @@ socket.on('newplace', function(data) {
     console.log('New place from backend: ', data);
     data.coords = L.point(data.coords);
     addMarker(data);
-
 })
+
+$("#markers-switch").on("change",function() {
+    var status = $(this).prop('checked');
+
+
+});

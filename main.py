@@ -32,6 +32,8 @@ class Place():
 		self.city = data.get('city')
 		self.shortname = f"{self.city}, {self.country}"
 		self.img = data.get('img')
+		self.city_id = data.get('city_id')
+		self.country_id = data.get('country_id')
 	def __str__(self):
 		return str(self.__class__) + ": " + str(self.__dict__)
 	def asdict(self):
