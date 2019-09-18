@@ -7,6 +7,7 @@ from flask_socketio import SocketIO, emit, send, join_room
 import re
 import requests, shutil
 from PIL import Image
+from pathlib import Path
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -46,9 +47,16 @@ def normalize(place):
 def mainview():
 	return render_template("index.html", username='', cities=cities)
 
+
 @app.route("/debug")
 def show_debug_info():
 	return f"clients: {str(clients)}<br/><br/>cities: {str(cities)}<br/><br/>cities: {str(cities.values())}<br/><br/>user_data: {str(user_data)}"
+
+
+@app.route("/users")
+def show_users():
+	return render_template("users.html", user_data=user_data, cities=cities)
+
 
 @app.route("/user/<username>")
 def userview(username):
@@ -110,18 +118,21 @@ def new_place(data):
 def new_place(data):
 
 	url = data.get('img')
+	country = data.get('country')
+	out_path = "static/images/country_icons/" + country
 
-	if url:
+	if url and not Path(out_path+'.jpg').is_file():
 		extension = '.' + url.split('.')[-1].split('?')[0].split('&')[0]
-		print('New image for', data['country'], url)
+		print('New image for', country, url)
 		response = requests.get(url, stream=True)
-		out_path = "static/images/country_icons/" + data['country']
+
 		with open(out_path + extension, 'wb') as out_file:
 			shutil.copyfileobj(response.raw, out_file)
 		im = Image.open(out_path + extension)
 		im.thumbnail((200,200))
 		im.save(out_path+'.jpg',"JPEG")
 		del response
+
 
 if __name__ == '__main__':
 	socketio.run(app, host='0.0.0.0', port=3000, use_reloader=True, debug=True)

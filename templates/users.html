@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="leaflask" content="track your travels">
+		<title>leaflask - track your travels</title>
+		<link rel="stylesheet" href="/static/css/style.css"/>
+	</head>
+    <body>
+		<div class="container-fluid">
+			<nav>
+				<div class="nav-wrapper">
+				  <a href="#!" class="brand-logo center">leaflask</a>
+				</div>
+			</nav>
+			<div class="row">
+				<div id="myplaces_container" class="col s12">
+                    {% for key,value in user_data.items() %}
+						<div>
+                            <p>{{key}}</p>
+                            {% for country, country_data in value.items() %}
+                                <ul id="myplaces_ul" class="collection">
+                                    {% for city in country_data %}
+                                        <!--{% if loop.index == 1 %}-->
+                                            <!--<li class="collection-item avatar" id="{{cities[city].country_id}}">-->
+                                            <!--<img src="/static/images/country_icons/{{cities[city].country}}.jpg" alt="{{cities[city].country}}" class="circle">-->
+                                            <!--<span class="title myplaces_country"><b>{{cities[city].country}}</b></span>-->
+                                        <!--{% endif %}-->
+                                        <!--<p id="{{cities[city].city_id}}">{{cities[city].city}}</p>-->
+                                        {{city}}
+                                     {% endfor %}
+                                    </li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+
+				</div>
+			</div>
+		</div>
+			<script src="/static/dist/bundle.js" type="text/javascript"></script>
+
+    </body>
+</html>

@@ -23,6 +23,7 @@ const config = {
             leaflet_css: __dirname + '/node_modules/leaflet/dist/leaflet.css',
             geosearch_css: __dirname + '/css/leaflet-geosearch_custom.css',
             style_css: __dirname + '/css/style.css',
+            countries_geojson: __dirname + '/js/geojson/countries_simp_repair.json',
         }
     },
     module: {
